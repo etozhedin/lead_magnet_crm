@@ -1,0 +1,12 @@
+{% extends 'crm/base.html' %}
+{% block title %}Sign in — Lead Magnet CRM Operations System{% endblock %}
+{% block content %}
+<section class="login-card">
+  <div class="eyebrow">WORKSPACE</div>
+  <h1>Welcome back.</h1><p class="muted">Sign in to manage your forms and applications.</p>
+  <form method="post">{% csrf_token %}{{ form.as_p }}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <button class="btn btn-dark w-100" type="submit">Sign in →</button>
+  </form>
+</section>
+{% endblock %}

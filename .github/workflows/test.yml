@@ -1,0 +1,38 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: lead_magnet_crm
+          POSTGRES_USER: lead_magnet_crm
+          POSTGRES_PASSWORD: test-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U lead_magnet_crm" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DEBUG: '1'
+      SECRET_KEY: ci-only-not-a-production-secret
+      DJANGO_SETTINGS_MODULE: config.settings
+      POSTGRES_DB: lead_magnet_crm
+      POSTGRES_USER: lead_magnet_crm
+      POSTGRES_PASSWORD: test-password
+      POSTGRES_HOST: localhost
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py spectacular --file /tmp/openapi.yaml --validate --fail-on-warn
+      - run: python manage.py collectstatic --noinput
+      - run: pytest
+      - run: python -m playwright install --with-deps chromium
+      - run: pytest -m browser

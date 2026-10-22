@@ -1,0 +1,3 @@
+{% load static %}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ campaign.name }}</title><link rel="stylesheet" href="{% static 'crm/public.css' %}"></head>
+<body><main><iframe id="lead-frame" title="{{ campaign.name }}" sandbox="allow-scripts allow-forms" src="{% url 'render-document' ticket %}"></iframe><div id="submission-status" role="status" aria-live="polite"></div><section id="success" hidden><div>✓</div><h1>Application submitted</h1><p>Thank you! Your application has been saved.</p></section></main>{{ ticket|json_script:'ticket' }}<script src="{% static 'crm/public.js' %}" defer></script></body></html>

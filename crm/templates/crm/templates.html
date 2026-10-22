@@ -1,0 +1,12 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">LIBRARY</div><h1>HTML forms</h1><p class="muted">Upload a form created with AI.</p></div></div>
+<div class="two-columns">
+<section class="panel padded"><h2>Upload a form</h2><p class="muted">One UTF-8 .html file, up to 512 KiB, containing exactly one form with named fields.</p>
+<form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn btn-dark" type="submit">Upload HTML →</button></form>
+<div class="notice">Inline styles are supported. Scripts and external resources are removed or blocked. Each field needs a unique <code>name</code>. Radio groups, multiple selections and file uploads are not supported.</div>
+</section>
+<section class="panel padded"><h2>Uploaded templates</h2>
+{% for template in templates %}<div class="template-row"><div><strong>{{ template.name }}</strong><small class="d-block muted">{{ template.fields|length }} fields · {{ template.created_at|date:'Y-m-d' }}</small></div><a href="{% url 'template-preview' template.pk %}">Preview ↗</a></div>{% empty %}<p class="muted mt-4">Your uploaded HTML forms will appear here.</p>{% endfor %}
+</section></div>
+{% endblock %}

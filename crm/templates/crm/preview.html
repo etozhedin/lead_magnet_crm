@@ -1,0 +1,2 @@
+{% extends 'crm/base.html' %}
+{% block content %}<div class="page-heading"><div><div class="eyebrow">PREVIEW</div><h1>{{ template.name }}</h1><p class="muted">Preview does not record visits or save applications. The link expires in 5 minutes.</p></div><a class="btn btn-dark" href="{% url 'campaign-create' %}">Create campaign →</a></div><iframe class="form-frame" title="HTML form preview" sandbox="allow-scripts allow-forms" src="{{ src }}"></iframe>{% endblock %}

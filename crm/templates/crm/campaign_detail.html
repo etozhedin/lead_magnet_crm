@@ -1,0 +1,11 @@
+{% extends 'crm/base.html' %}
+{% block title %}{{ campaign.name }} — Lead Magnet CRM Operations System{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><a href="/">CAMPAIGNS</a> / {{ campaign.template.name }}</div><h1>{{ campaign.name }}</h1><p class="muted">{% if campaign.active %}Campaign active{% else %}Campaign paused: new visits and applications are disabled{% endif %} · All-time performance</p></div><form method="post" action="{% url 'campaign-toggle' campaign.pk %}">{% csrf_token %}<button class="btn btn-outline-dark" type="submit">{% if campaign.active %}Pause campaign{% else %}Resume campaign{% endif %}</button></form></div>
+{% include 'crm/metrics.html' %}
+<section class="panel"><div class="panel-heading"><h2>Distribution channels</h2><span class="muted">Links ready to share</span></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Channel</th><th>Link</th><th>Visits</th><th>Visitors</th><th>Applications</th><th>Conversion</th></tr></thead><tbody>
+{% for channel in channels %}<tr><td class="text-capitalize"><strong>{{ channel.channel }}</strong></td><td><a class="distribution-link" href="{{ channel.url }}" target="_blank" rel="noopener">{{ channel.url }}</a></td><td>{{ channel.visits }}</td><td>{{ channel.visitors }}</td><td>{{ channel.applications }}</td><td>{{ channel.conversion_rate }}%</td></tr>{% endfor %}
+</tbody></table></div></section>
+<section class="panel mt-4"><div class="panel-heading"><h2>Applications</h2><span class="muted">Latest 100 · all applications available through the API</span></div>
+{% if leads %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Application</th><th>Channel</th><th>Data</th><th>Received</th></tr></thead><tbody>{% for lead in leads %}<tr><td>#{{ lead.id }}</td><td>{{ lead.visit.link.get_channel_display }}</td><td>{% for key, value in lead.display_fields %}<div><span class="muted">{{ key }}:</span> {{ value }}</div>{% endfor %}</td><td>{{ lead.created_at|date:'Y-m-d H:i' }} UTC</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty"><h3>Your first applications will appear here</h3><p>Share a channel link or submit a test application.</p></div>{% endif %}</section>
+{% endblock %}

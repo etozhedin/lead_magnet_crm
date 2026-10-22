@@ -1,0 +1,5 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">NEW CAMPAIGN</div><h1>Create your next campaign.</h1><p class="muted">Choose a form. Channel links will be generated automatically.</p></div></div>
+<section class="panel padded narrow"><form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-dark" type="submit">Create campaign →</button></form><p class="muted mt-4">No template yet? <a href="{% url 'templates' %}">Upload an HTML form</a></p></section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Lead Magnet CRM Operations System{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'crm/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'crm/app.css' %}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="/">Lead Magnet<br><span>CRM</span></a>
+    <div class="nav-caption">WORKSPACE</div>
+    <nav>
+      <a href="/" {% if request.path == '/' %}class="selected"{% endif %}>◈ &nbsp; Campaigns</a>
+      <a href="{% url 'templates' %}" {% if '/templates/' in request.path %}class="selected"{% endif %}>▤ &nbsp; HTML forms</a>
+      {% if user.is_staff %}<a href="{% url 'api-docs' %}">↗ &nbsp; API documentation</a>{% endif %}
+    </nav>
+    <div class="sidebar-bottom">
+      {% if user.is_authenticated %}<span class="avatar">{{ user.username|first|upper }}</span> {{ user.username }}
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout" type="submit">Sign out ↗</button></form>
+      {% else %}<span class="text-muted">Operator workspace</span>{% endif %}
+    </div>
+  </aside>
+  <main>
+    {% for message in messages %}<div class="alert alert-success" role="status">{{ message }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+    <footer>Lead Magnet CRM Operations System <span>From the first visit to a new application.</span></footer>
+  </main>
+</div>
+</body>
+</html>

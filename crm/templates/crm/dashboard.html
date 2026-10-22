@@ -1,0 +1,12 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">OVERVIEW / ALL TIME</div><h1>Your campaigns</h1><p class="muted">Forms, channels and results in one place.</p></div><a class="btn btn-dark" href="{% url 'campaign-create' %}">+ Create campaign</a></div>
+{% include 'crm/metrics.html' %}
+<section class="panel"><div class="panel-heading"><h2>Campaigns <span class="count">{{ campaigns|length }}</span></h2><span class="muted">All channels</span></div>
+{% if campaigns %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Campaign</th><th>Status</th><th>Visits</th><th>Applications</th><th>Conversion</th><th></th></tr></thead><tbody>
+{% for row in campaigns %}<tr><td><a class="campaign-name" href="{% url 'campaign-detail' row.campaign.pk %}">{{ row.campaign.name }}</a><small class="d-block muted">{{ row.campaign.template.name }}</small></td><td>{% if row.campaign.active %}<span class="status active">● Active</span>{% else %}<span class="status">● Paused</span>{% endif %}</td><td>{{ row.stats.visits }}</td><td>{{ row.stats.applications }}</td><td>{{ row.stats.conversion_rate }}%</td><td><a href="{% url 'campaign-detail' row.campaign.pk %}" aria-label="Open {{ row.campaign.name }}">↗</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<div class="empty"><div class="empty-symbol">↗</div><h3>Your first campaign starts with a form</h3><p>Upload an HTML file, create a campaign and share its links.</p><a class="btn btn-dark" href="{% url 'templates' %}">Upload HTML →</a></div>{% endif %}
+</section>
+<div class="flow-strip"><span>01 &nbsp; Upload HTML</span><b>→</b><span>02 &nbsp; Create a campaign</span><b>→</b><span>03 &nbsp; Share your links</span><b>→</b><span>04 &nbsp; Track applications</span></div>
+{% endblock %}
