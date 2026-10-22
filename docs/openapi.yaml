@@ -47,6 +47,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
+        '429':
+          description: Too many sign-in attempts.
   /api/auth/logout/:
     post:
       operationId: auth_logout_create

@@ -21,6 +21,10 @@ All authenticated writes require X-CSRFToken (or HTML form csrfmiddlewaretoken).
 Invalid credentials return 400, missing CSRF returns 403. Unauthenticated protected
 API calls return 403 with SessionAuthentication. API login is IP-throttled locally;
 for multiple production workers, use a shared cache/proxy rate limiter.
+All login paths also share a persistent username-based failure counter through
+Django Axes: ten failed authentications lock that account for ten minutes.
+Lockouts return 429 with a generic detail and Retry-After: 600, including when a
+correct password is supplied during lockout. See ADR 005 for tradeoffs.
 
 ## Forms and campaigns
 

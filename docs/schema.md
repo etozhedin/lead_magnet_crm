@@ -1,7 +1,10 @@
 # Relational schema
 
 Django auth_user and django_session provide operators and server-side sessions.
-All application tables are created by crm/migrations/0001_initial.py.
+CRM application tables are created by crm/migrations/0001_initial.py.
+Django Axes supplies its own pinned package migrations for axes_* security tables.
+Its AccessAttempt records provide persistent username-based login lockouts.
+Successful-login access logging is disabled; client IPs are not collected by Axes.
 
 ```mermaid
 erDiagram

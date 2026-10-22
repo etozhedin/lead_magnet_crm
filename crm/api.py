@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -49,11 +49,15 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [LoginThrottle]
 
-    @extend_schema(request=LoginSerializer, responses={200: UserSerializer}, tags=["Authentication"])
+    @extend_schema(
+        request=LoginSerializer,
+        responses={200: UserSerializer, 429: OpenApiResponse(description="Too many sign-in attempts.")},
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = authenticate(request, **serializer.validated_data)
+        user = authenticate(request._request, **serializer.validated_data)
         if not user or not user.is_staff:
             return Response({"detail": "Invalid credentials."}, status=400)
         login(request, user)
