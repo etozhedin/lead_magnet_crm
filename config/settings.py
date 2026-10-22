@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .environment import external_database, origin_setting
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.getenv("DEBUG", "0") == "1"
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
@@ -9,8 +11,18 @@ if not SECRET_KEY:
     if not DEBUG:
         raise RuntimeError("Set SECRET_KEY or enable DEBUG for local development.")
     SECRET_KEY = "local-development-only-do-not-use-in-production"
-ADMIN_ORIGIN = os.getenv("ADMIN_ORIGIN", "http://admin.localhost:8017").rstrip("/")
-PUBLIC_ORIGIN = os.getenv("PUBLIC_ORIGIN", "http://forms.localhost:8017").rstrip("/")
+if not DEBUG and (
+    len(SECRET_KEY) < 32
+    or SECRET_KEY
+    in {
+        "local-development-only-do-not-use-in-production",
+        "replace-with-a-long-random-secret-before-deploying",
+        "generate-a-random-secret-and-share-it-between-both-services",
+    }
+):
+    raise RuntimeError("Set a strong, unique SECRET_KEY for deployment; do not use an example value.")
+ADMIN_ORIGIN = origin_setting("ADMIN_ORIGIN", "http://admin.localhost:8017", debug=DEBUG)
+PUBLIC_ORIGIN = origin_setting("PUBLIC_ORIGIN", "http://forms.localhost:8017", debug=DEBUG)
 if urlsplit(ADMIN_ORIGIN).hostname == urlsplit(PUBLIC_ORIGIN).hostname:
     raise RuntimeError("Admin and public forms require different hostnames, not just ports.")
 ALLOWED_HOSTS = [urlsplit(x).hostname for x in (ADMIN_ORIGIN, PUBLIC_ORIGIN)]
@@ -20,9 +32,17 @@ LOCAL_HOST_ALIASES = (
     else ()
 )
 ALLOWED_HOSTS.extend(LOCAL_HOST_ALIASES)
+SERVICE_ROLE = os.getenv("SERVICE_ROLE", "combined")
+if SERVICE_ROLE not in {"combined", "admin", "public"}:
+    raise RuntimeError("SERVICE_ROLE must be combined, admin or public.")
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 CSRF_TRUSTED_ORIGINS = [ADMIN_ORIGIN]
 if os.getenv("TRUST_PROXY", "0") == "1":
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_REDIRECT_EXEMPT = [r"^health/$"]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -60,7 +80,11 @@ TEMPLATES = [
     }
 ]
 WSGI_APPLICATION = "config.wsgi.application"
-if os.getenv("DB_ENGINE") == "sqlite":
+if os.getenv("DATABASE_URL"):
+    DATABASES = {"default": external_database(os.environ["DATABASE_URL"], debug=DEBUG)}
+elif os.getenv("DB_ENGINE") == "sqlite":
+    if not DEBUG:
+        raise RuntimeError("SQLite is only available with DEBUG=1. Use PostgreSQL for deployment.")
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 else:
     DATABASES = {

@@ -4,6 +4,10 @@ OpenAPI: [openapi.yaml](openapi.yaml); interactive UI at ADMIN_ORIGIN/api/docs/ 
 Administration uses host-only Django session cookies and staff permissions.
 Other operators' resources return 404. Lists are paginated (50 items per page).
 Public routes are available only on PUBLIC_ORIGIN. Wrong surface returns 404.
+Deployments can run separate admin/public service roles as described in ADR 004.
+GET /health/ is an unauthenticated readiness probe on either host: it returns
+200 {"status":"ok"} after a database query, or 503 {"status":"unavailable"}
+without connection details. It does not expose campaign or applicant data.
 
 ## Authentication
 

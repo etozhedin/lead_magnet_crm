@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 from crm import api, views
 from crm.forms import OperatorAuthenticationForm
+from crm.health import health
 
 router = DefaultRouter()
 router.register("templates", api.TemplateViewSet, basename="api-template")
@@ -13,6 +14,7 @@ router.register("campaigns", api.CampaignViewSet, basename="api-campaign")
 router.register("leads", api.LeadViewSet, basename="api-lead")
 
 urlpatterns = [
+    path("health/", health, name="health"),
     path("", views.dashboard, name="dashboard"),
     path(
         "login/",

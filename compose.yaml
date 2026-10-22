@@ -10,7 +10,10 @@ services:
       timeout: 3s
       retries: 20
   web:
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_DEV: '1'
     env_file: .env
     ports:
       - '127.0.0.1:8017:8017'

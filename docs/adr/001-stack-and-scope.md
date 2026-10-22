@@ -9,6 +9,8 @@ Compose and CI use PostgreSQL. No AI, external CRM, ads or messaging integration
 
 An operator is an active staff user. Provision users via createsuperuser or the
 superuser-only service admin. No public registration or password reset is needed.
+The optional deployment bootstrap in ADR 004 provisions the first staff operator
+when the hosting plan does not provide an interactive shell.
 Operator UI and API filter resources by owner. A superuser is trusted to manage
 all records using Django Admin. Other staff users receive no model permissions by
 default. Campaigns have one immutable template; templates cannot be edited via API.

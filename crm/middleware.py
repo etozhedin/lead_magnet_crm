@@ -11,11 +11,18 @@ class SurfaceMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        host = request.get_host()
+        if request.path == "/health/":
+            return self.get_response(request)
         public = request.path.startswith(("/r/", "/public/", "/api/public/"))
+        static = request.path.startswith("/static/")
+        if not static and (
+            settings.SERVICE_ROLE == "admin" and public or settings.SERVICE_ROLE == "public" and not public
+        ):
+            return HttpResponseNotFound("Not found")
         origin = settings.PUBLIC_ORIGIN if public else settings.ADMIN_ORIGIN
         target = urlsplit(origin)
         expected = target.netloc
-        host = request.get_host()
         aliases = {
             f"{alias}:{target.port}" if target.port else alias for alias in settings.LOCAL_HOST_ALIASES
         }
@@ -25,7 +32,7 @@ class SurfaceMiddleware:
             response["Cache-Control"] = "no-store"
             return response
         allowed = {expected}
-        if request.path.startswith("/static/"):
+        if static:
             allowed.add(urlsplit(settings.PUBLIC_ORIGIN).netloc)
         if host not in allowed:
             return HttpResponseNotFound("Not found")

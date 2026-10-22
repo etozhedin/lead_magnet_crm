@@ -62,6 +62,60 @@ Keep the cookie domain unset. Preserve the original Host header.
 Behind a trusted proxy, set `TRUST_PROXY=1`. The proxy must overwrite
 `X-Forwarded-Proto` and prevent direct external access to the backend.
 
+## Render + Neon (two services, no custom domain)
+
+1. Publish this repository to your Git provider. Create a Neon project near the
+   region you will use on Render. In Neon **Connect**, turn connection pooling
+   **off** and copy the **direct** PostgreSQL connection URL, retaining
+   `sslmode=require` and any `channel_binding` parameter. Startup migrations use
+   a session lock and must not use a `-pooler` hostname.
+2. In Render, create a **Blueprint** from this rfrfrepository using `render.yaml`.
+   It defines two free Docker web services, `lead-magnet-crm-admin` and
+   `lead-magnet-crm-forms`. Choose different service names before import if those
+   names already identify resources in your workspace, and update all
+   `fromService.name` references to match.
+3. Supply the prompted values on the admin service: `DATABASE_URL`,
+   `ADMIN_ORIGIN`, `PUBLIC_ORIGIN`, `BOOTSTRAP_OPERATOR_USERNAME` and
+   `BOOTSTRAP_OPERATOR_PASSWORD`. Use a unique password of at least 16 characters.
+   The Blueprint generates a shared `SECRET_KEY` and copies it, the database URL
+   and both origins to the forms service. Do not give the forms service bootstrap
+   credentials. `deploy/render.env.example` lists the configuration fields without
+   real secrets.
+4. Origins must be the **exact HTTPS URLs** assigned by Render, without a path or
+   trailing slash. Render may add a suffix to a service's hostname. If the URLs
+   are not available during initial Blueprint setup, temporarily enter
+   `https://admin.pending.invalid` and `https://forms.pending.invalid`. Once the
+   two services exist, copy their actual URLs from the Render dashboard, update
+   both origin variables on the **admin** service and save them. **Sync the
+   Blueprint again** so the forms service receives the new shared values, then
+   manually deploy both services. The temporary origins intentionally do not
+   serve the UI: a green health check alone does not mean URL setup is complete.
+5. Wait for both deployments to pass `/health/`. Startup applies migrations under
+   a PostgreSQL lock, creates the initial operator once, then starts Gunicorn on
+   Render's `PORT`. Free services do not need shell access or a pre-deploy hook.
+   Open `ADMIN_ORIGIN/login/` and sign in. Existing users and passwords are never
+   overwritten by bootstrap. After the first successful sign-in, remove **both**
+   bootstrap variables from the admin service and redeploy it.
+6. Upload `examples/guide.html`, create a campaign and open a generated link. Its
+   hostname must match `PUBLIC_ORIGIN`. Submit an application and verify the
+   application and channel metrics in the operator dashboard. Accessing
+   `PUBLIC_ORIGIN/api/leads/` must return 404.
+
+Both services must always share the same database, signing key and origin values.
+After changing any of these values on admin, sync the Blueprint and deploy both
+services. Deploy the same commit to both. Automatic deploys are disabled in the
+template; trigger updates from Render's dashboard.
+
+Render Free services sleep after idle periods, so the first opening can take
+about a minute. Both services consume the workspace's shared free usage allowance.
+No Render persistent disk is required: HTML, sessions, visits and applications
+are stored in Neon. Keep local `.env` credentials separate from cloud secrets.
+
+Platform instructions: [Render Docker](https://render.com/docs/docker),
+[Blueprint environment references](https://render.com/docs/blueprint-spec),
+[Render Free limits](https://render.com/docs/free),
+[Neon Django connections](https://neon.com/docs/guides/django).
+
 # Testing
 
 ## Docker Compose (PostgreSQL)
@@ -119,3 +173,16 @@ Run every test, including browser tests, with:
 ```sh
 pytest -o addopts=''
 ```
+
+Deployment configuration, readiness, operator bootstrap and migration-lock tests
+are included in `tests/test_deployment.py`. The real advisory-lock test requires
+PostgreSQL and is skipped by the fast SQLite suite. To run it with Compose:
+
+```sh
+docker compose run --rm -e DJANGO_SETTINGS_MODULE=config.settings web pytest tests/test_deployment.py
+```
+
+Before publishing a Render configuration, validate `render.yaml` against
+`https://render.com/schema/render.yaml.json` or, with Render CLI installed, run
+`render blueprints validate render.yaml`. Validation with the Render account and
+the live Neon connection are checked during the actual deployment.

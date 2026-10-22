@@ -76,3 +76,36 @@ recreated only the web service; PostgreSQL was not restarted during this fix.
 
 The original 52-test PostgreSQL audit above predates the four additional loopback
 redirect tests. The current suite contains 56 tests in total.
+
+## Render + Neon deployment preparation
+
+Prepared `render.yaml` for two free Docker services sharing a Neon database and
+one generated signing key. No Render or Neon resources were provisioned.
+
+- `render.yaml` validates locally against Render's official JSON schema at
+  `https://render.com/schema/render.yaml.json`.
+- Production Docker image build passed, installing runtime dependencies only.
+  Compose explicitly enables development dependencies for its test commands.
+- A local simulation used two instances of that production image with DEBUG=0,
+  separate admin/public roles, PORT=10000, a trusted HTTPS proxy and a fresh
+  PostgreSQL 17 container configured for TLS and SCRAM channel binding.
+- Both instances started together, applied migrations under the advisory lock,
+  and passed HTTP readiness checks on their simulated Render-assigned hostnames.
+- Confirmed an actual PostgreSQL connection was encrypted with `pg_stat_ssl`.
+- Chromium completed initial-operator login, HTML upload, cross-service signed
+  preview, campaign creation, public application submission, CRM display and
+  operator-cookie isolation over HTTPS. Public-host applicant API returned 404.
+- **70 server tests passed against that TLS-enabled PostgreSQL**, including the
+  real deployment-initialization command and all new configuration/bootstrap tests.
+- **3 browser tests passed** separately using the fast local test database.
+- Fast SQLite suite: 69 passed, one PostgreSQL-only lock test skipped.
+- Django check, migration drift check, OpenAPI validation, lint and shell syntax
+  checks passed. Compose configuration validation passed without restarting it.
+- Temporary services, database, anonymous volumes, test certificates and test
+  credentials were removed. The existing local application and its database were
+  not redeployed or modified by the simulation.
+
+Live Neon credentials, actual Render URL assignment, account-level Blueprint sync,
+free-plan scheduling and public DNS have not been exercised. These are checked
+when performing the real deployment described in README. Exact origins are manual
+inputs; placeholder origins must be replaced before the demo UI can be used.

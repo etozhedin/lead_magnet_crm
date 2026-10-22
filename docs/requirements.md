@@ -21,10 +21,10 @@ of unspecified behavior are recorded in the ADRs; delivery steps are tracked sep
 
 | Requirement | Status and implementation | Verification |
 |---|---|---|
-| Use a relational database | PostgreSQL is the default; Compose and CI use PostgreSQL | Original full audit on PostgreSQL 17; latest 53 server tests also passed inside the deployed image |
+| Use a relational database | PostgreSQL is the default; Compose and CI use PostgreSQL | Original full audit on PostgreSQL 17; latest 70 server tests passed against TLS-enabled PostgreSQL during deployment preparation |
 | Complete the operational flow rather than build extra features | Upload → campaign → channel link → public application → CRM and metrics | `test_operator_to_conversion` in Chromium |
 | Uploaded HTML cannot access administrator credentials or administrative APIs | Separate hosts, host-only cookies, sanitization, iframe and response CSP sandbox, blocked network requests | Chromium checks cookie/parent DOM isolation, credentialed admin API fetch blocking, direct-document sandbox and public-host API denial |
-| Automated tests cover core success and failure flows | 53 server tests and 3 Chromium tests | Latest checks: 53 server tests on PostgreSQL and 3 browser tests on isolated SQLite passed |
+| Automated tests cover core success and failure flows | 70 server tests and 3 Chromium tests | Latest checks: 70 server tests on PostgreSQL and 3 browser tests on isolated SQLite passed; two-service HTTPS workflow verified |
 | README contains only running and testing instructions | English instructions for Docker, local development, HTTPS, server and browser tests | Manual content review; startup command typo corrected |
 | Record major decisions and reasonable assumptions in ADRs | Three ADRs cover stack/scope, HTML isolation, attribution/metrics | Cross-checked against implementation and tests |
 
@@ -38,7 +38,7 @@ of unspecified behavior are recorded in the ADRs; delivery steps are tracked sep
 | Test code | `tests/`, pytest configuration, PostgreSQL CI workflow |
 | API documentation | `docs/api.md`, generated OpenAPI, Swagger UI |
 | README | English; running and testing instructions only |
-| ADR | `docs/adr/001-stack-and-scope.md` through `003-attribution-and-metrics.md` |
+| ADR | `docs/adr/001-stack-and-scope.md` through `004-render-neon-deployment.md` |
 
 ## Documented assumptions and limits
 
