@@ -69,9 +69,9 @@ Behind a trusted proxy, set `TRUST_PROXY=1`. The proxy must overwrite
    **off** and copy the **direct** PostgreSQL connection URL, retaining
    `sslmode=require` and any `channel_binding` parameter. Startup migrations use
    a session lock and must not use a `-pooler` hostname.
-2. In Render, create a **Blueprint** from this rfrfrepository using `render.yaml`.
-   It defines two free Docker web services, `lead-magnet-crm-admin` and
-   `lead-magnet-crm-forms`. Choose different service names before import if those
+2. In Render, create a **Blueprint** from this repository using `render.yaml`.
+   It defines two free Docker web services in Singapore, `lead-magnet-crm-admin-sg` and
+   `lead-magnet-crm-forms-sg`. Choose different service names before import if those
    names already identify resources in your workspace, and update all
    `fromService.name` references to match.
 3. Supply the prompted values on the admin service: `DATABASE_URL`,

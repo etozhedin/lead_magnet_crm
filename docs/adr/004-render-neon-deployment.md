@@ -1,6 +1,6 @@
 # ADR 004: Two Render services and Neon
 
-Status: accepted for deployment preparation. No cloud resources have been created.
+Status: accepted and deployed. Render services run in Singapore; Neon remains in its existing region.
 
 ## Context
 
@@ -65,3 +65,21 @@ References:
 - [Render health checks](https://render.com/docs/health-checks)
 - [Render free limitations](https://render.com/docs/free)
 - [Neon Django connection settings](https://neon.com/docs/guides/django)
+
+## Region migration (2026-10-22)
+
+The operator requested an Asian Render region closer to reviewers in Korea.
+Choose Singapore for both services. Render regions are immutable, so create
+replacement services, retaining the same Neon database and signing key.
+Accounts, uploaded forms and campaign identifiers remain in the database.
+Public hostnames change; use newly generated links after the move.
+
+During cutover, copy database and key values from the Oregon service through
+Render environment references. After provisioning, remove that dependency:
+the Singapore admin retains its existing secret values, and the Singapore forms
+service references the Singapore admin. Verify both services before retiring
+the Oregon instances. Never commit connection strings or signing keys.
+
+Neon is intentionally unchanged at the operator's request. Its distance from
+Singapore can add database latency; this migration does not claim to optimize
+that round trip.
