@@ -69,3 +69,69 @@ services:
           type: web
           name: lead-magnet-crm-admin
           envVarKey: PUBLIC_ORIGIN
+
+  - type: web
+    name: lead-magnet-crm-admin-sg
+    region: singapore
+    runtime: docker
+    plan: free
+    autoDeployTrigger: 'off'
+    healthCheckPath: /health/
+    envVars:
+      - key: DEBUG
+        value: '0'
+      - key: TRUST_PROXY
+        value: '1'
+      - key: SERVICE_ROLE
+        value: admin
+      - key: RUN_MIGRATIONS
+        value: '1'
+      - key: WEB_CONCURRENCY
+        value: '1'
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: lead-magnet-crm-admin
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromService:
+          type: web
+          name: lead-magnet-crm-admin
+          envVarKey: DATABASE_URL
+      - key: ADMIN_ORIGIN
+        value: https://lead-magnet-crm-admin-sg.onrender.com
+      - key: PUBLIC_ORIGIN
+        value: https://lead-magnet-crm-forms-sg.onrender.com
+
+  - type: web
+    name: lead-magnet-crm-forms-sg
+    region: singapore
+    runtime: docker
+    plan: free
+    autoDeployTrigger: 'off'
+    healthCheckPath: /health/
+    envVars:
+      - key: DEBUG
+        value: '0'
+      - key: TRUST_PROXY
+        value: '1'
+      - key: SERVICE_ROLE
+        value: public
+      - key: RUN_MIGRATIONS
+        value: '1'
+      - key: WEB_CONCURRENCY
+        value: '1'
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: lead-magnet-crm-admin
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromService:
+          type: web
+          name: lead-magnet-crm-admin
+          envVarKey: DATABASE_URL
+      - key: ADMIN_ORIGIN
+        value: https://lead-magnet-crm-admin-sg.onrender.com
+      - key: PUBLIC_ORIGIN
+        value: https://lead-magnet-crm-forms-sg.onrender.com
